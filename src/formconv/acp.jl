@@ -62,7 +62,7 @@ function constraint_conv_transformer(pm::AbstractACPModel, n::Int, cnd::Int, i::
         PowerModels.con(pm, n, cnd, :conv_tf_p_fr)[i] = @constraint(pm.model, ptf_fr + ptf_to == 0)
         PowerModels.con(pm, n, cnd, :conv_tf_q_fr)[i] = @constraint(pm.model, qtf_fr + qtf_to == 0)
         @constraint(pm.model, va == vaf)
-        @constraint(pm.model, vm == vmf)
+        @constraint(pm.model, vm/(tm) == vmf)
     end
 end
 "constraints for a voltage magnitude transformer + series impedance"
@@ -82,7 +82,7 @@ p_pr_fr ==  gc *vmf^2 + -gc *vmf*vmc*cos(vaf - vac) + -bc *vmf*vmc*sin(vaf - vac
 q_pr_fr == -bc *vmf^2 +  bc *vmf*vmc*cos(vaf - vac) + -gc *vmf*vmc*sin(vaf - vac)
 ```
 """
-function constraint_conv_reactor(pm::AbstractACPModel, n::Int, cnd::Int, i::Int, rc, xc, reactor)
+function constraint_conv_reactor(pm::AbstractPowerModel, n::Int, cnd::Int, i::Int, rc, xc, reactor)
     pconv_ac = PowerModels.var(pm, n, cnd, :pconv_ac, i)
     qconv_ac = PowerModels.var(pm, n, cnd, :qconv_ac, i)
     ppr_fr = PowerModels.var(pm, n, cnd, :pconv_pr_fr, i)

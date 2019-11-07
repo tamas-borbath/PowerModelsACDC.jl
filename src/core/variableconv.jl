@@ -219,7 +219,7 @@ function variable_acside_current(pm::AbstractPowerModel; nw::Int=pm.cnw, cnd::In
 end
 
 "variable: `iconv_ac[j]` and `iconv_ac_sq[j]` for `j` in `convdc`"
-function variable_acside_current(pm::AbstractWModels; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+function variable_acside_current(pm::PowerModels.AbstractWModels; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     PowerModels.var(pm, nw, cnd)[:iconv_ac] = @variable(pm.model,
     [i in PowerModels.ids(pm, nw, :convdc)], base_name="$(nw)_$(cnd)_iconv_ac",
     lower_bound = 0,
@@ -235,7 +235,7 @@ function variable_acside_current(pm::AbstractWModels; nw::Int=pm.cnw, cnd::Int=p
 end
 
 "variable: `itf_sq[j]` for `j` in `convdc`"
-function variable_conv_transformer_current_sqr(pm::AbstractWModels; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+function variable_conv_transformer_current_sqr(pm::PowerModels.AbstractWModels; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     bigM = 2; #TODO derive exact bound
     PowerModels.var(pm, nw, cnd)[:itf_sq] = @variable(pm.model,
     [i in PowerModels.ids(pm, nw, :convdc)], base_name="$(nw)_$(cnd)_itf_sq",
@@ -247,7 +247,7 @@ end
 
 
 "variable: `irc_sq[j]` for `j` in `convdc`"
-function variable_conv_reactor_current_sqr(pm::AbstractWModels; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
+function variable_conv_reactor_current_sqr(pm::PowerModels.AbstractWModels; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
     bigM = 2; #TODO derive exact bound
     PowerModels.var(pm, nw, cnd)[:irc_sq] = @variable(pm.model,
     [i in PowerModels.ids(pm, nw, :convdc)], base_name="$(nw)_$(cnd)_irc_sq",
@@ -371,8 +371,4 @@ function variable_converter_internal_voltage_magnitude_sqr(pm::AbstractPowerMode
     upper_bound =  PowerModels.ref(pm, nw, :convdc, i, "Vmmax", cnd)^2,
     start = PowerModels.ref(pm, nw, :convdc, i, "Vtar", cnd)^2
     )
-end
-
-function variable_cos_voltage(pm::AbstractPowerModel; nw::Int=pm.cnw, cnd::Int=pm.ccnd, bounded::Bool = true)
-    #only for lpac
 end

@@ -1,15 +1,15 @@
 export run_acdcpf
 
 ""
-function run_acdcpf(file::String, model_type::Type, solver; kwargs...)
+function run_acdcpf(file::String, model_constructor, solver; kwargs...)
     data = PowerModels.parse_file(file)
     PowerModelsACDC.process_additional_data!(data)
-    return run_acdcpf(data::Dict{String,Any}, model_type, solver; kwargs...)
+    return run_acdcpf(data::Dict{String,Any}, model_constructor, solver; kwargs...)
 end
 
 ""
-function run_acdcpf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
-    pm = PowerModels.build_model(data, model_type, post_acdcpf; kwargs...)
+function run_acdcpf(data::Dict{String,Any}, model_constructor, solver; kwargs...)
+    pm = PowerModels.build_model(data, model_constructor, post_acdcpf; kwargs...)
     #display(pm)
     return PowerModels.optimize_model!(pm, solver; solution_builder = get_solution_acdc)
 end

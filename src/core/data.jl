@@ -29,12 +29,13 @@ function process_additional_data!(data)
     to_pu!(data)
     # make sure everything is set up correctly
     fix_data!(data)
+    MVAbase = data["baseMVA"]
     #
     # #set data in correct base
     # to_pu!(data)
 
     #convert dcline to 2 converters, 2 dc buses, 1 branchdc
-    convert_matpowerdcline_to_branchdc!(data)
+    convert_matpowerdcline_to_branchdc!(data, MVAbase)
 end
 
 function is_single_network(data)
@@ -76,8 +77,8 @@ function to_pu_single_network!(data)
 end
 
 function to_pu_multinetwork!(data)
+    MVAbase = data["baseMVA"]
     for (n, network) in data["nw"]
-        MVAbase = network["baseMVA"]
         if haskey(data["nw"][n], "convdc")
             for (i, conv) in data["nw"][n]["convdc"]
                 dcbus = conv["busdc_i"]
@@ -103,16 +104,15 @@ function to_pu_multinetwork!(data)
     end
 end
 
-function convert_matpowerdcline_to_branchdc!(data)
+function convert_matpowerdcline_to_branchdc!(data, MVAbase)
     if is_single_network(data)
-        convert_matpowerdcline_to_branchdc_single_network!(data)
+        convert_matpowerdcline_to_branchdc_single_network!(data, MVAbase)
     else
-        convert_matpowerdcline_to_branchdc_multinetwork!(data)
+        convert_matpowerdcline_to_branchdc_multinetwork!(data, MVAbase)
     end
 end
 
-function convert_matpowerdcline_to_branchdc_single_network!(data)
-    MVAbase = data["baseMVA"]
+function convert_matpowerdcline_to_branchdc_single_network!(data, MVAbase)
     if haskey(data, "dcline") && haskey(data["dcline"], "1")
         if !haskey(data, "convdc")
             data["convdc"] = Dict{String, Any}()
@@ -161,9 +161,8 @@ function convert_matpowerdcline_to_branchdc_single_network!(data)
     data["dcline"] = []
 end
 
-function convert_matpowerdcline_to_branchdc_multinetwork!(data)
+function convert_matpowerdcline_to_branchdc_multinetwork!(data, MVAbase)
     for (n, network) in data["nw"]
-            MVAbase = network["baseMVA"]
         if haskey(data["nw"][n], "dcline") && haskey(data["nw"][n]["dcline"], "1")
             if !haskey(data["nw"][n], "convdc")
                 data["nw"][n]["convdc"] = Dict{String, Any}()
@@ -215,20 +214,19 @@ end
 
 
 function fix_data!(data)
-
+    MVAbase = data["baseMVA"]
+    @assert(MVAbase>0)
 
     rescale_energy_cost = x -> (MWhbase/dollarbase)*x
 
     if is_single_network(data)
-        fix_data_single_network!(data)
+        fix_data_single_network!(data, MVAbase)
     else
-        fix_data_multinetwork!(data)
+        fix_data_multinetwork!(data, MVAbase)
     end
 end
 
-function fix_data_single_network!(data)
-    MVAbase = data["baseMVA"]
-    @assert(MVAbase>0)
+function fix_data_single_network!(data, MVAbase)
     if haskey(data, "convdc")
         for (i, conv) in data["convdc"]
             check_conv_parameters(conv)
@@ -252,10 +250,8 @@ function fix_data_single_network!(data)
     end
 end
 
-function fix_data_multinetwork!(data)
+function fix_data_multinetwork!(data, MVAbase)
     for (n, network) in data["nw"]
-        MVAbase = network["baseMVA"]
-        @assert(MVAbase>0)
         if haskey(data["nw"][n], "convdc")
             for (i, conv) in data["nw"][n]["convdc"]
                 check_conv_parameters(conv)

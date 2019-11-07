@@ -1,15 +1,15 @@
 export run_acdcopf_bf
 
 ""
-function run_acdcopf_bf(file::String, model_type::Type{T}, solver; kwargs...) where T <: AbstractBFModel
+function run_acdcopf_bf(file::String, model_constructor::AbstractBFModel, solver; kwargs...)
     data = PowerModels.parse_file(file)
     PowerModelsACDC.process_additional_data!(data)
-    return run_acdcopf_bf(data, model_type, solver; kwargs...)
+    return run_acdcopf_bf(data, model_constructor, solver; kwargs...)
 end
 
 ""
-function run_acdcopf_bf(data::Dict{String,Any}, model_type::Type{T}, solver; kwargs...) where T <: AbstractBFModel
-    pm = PowerModels.build_model(data, model_type, post_acdcopf_bf; kwargs...)
+function run_acdcopf_bf(data::Dict{String,Any}, model_constructor::AbstractBFModel, solver; kwargs...)
+    pm = PowerModels.build_model(data, model_constructor, post_acdcopf_bf; kwargs...)
     return PowerModels.optimize_model!(pm, solver; solution_builder = get_solution_acdc)
 end
 
